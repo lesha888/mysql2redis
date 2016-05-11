@@ -6,14 +6,14 @@
 
 static struct config cfg = {
     .tcp = {
-	.host = "192.168.0.118",
+	.host = "redis.mbk",
 	.port = 6379
     },
     .unix_sock = {
     	.path = "/tmp/redis.sock"
      },
-    .password = "go2oovoo",
-    .auth = 0,
+    .password = "_PASSWORD_JXi6G3AL",
+    .auth = 1,
     .log_file = "/tmp/redis_udf.log",
     .debug = 0,
     .type = CONN_TCP
@@ -43,7 +43,7 @@ void check_error(apr_status_t rv) {
     if (rv != APR_SUCCESS) {
 	char buf[512], ebuf[256];
 	sprintf(buf, "(%d): %s\n", rv, apr_strerror(rv, ebuf, sizeof ebuf));
-	debug_print(buf);
+	debug_print("%s",buf);
     }
 }
 //apr initialization and destroy.
@@ -331,9 +331,10 @@ my_bool redis_command_v2_init(
     char *message
 ){
     if(
-    args->arg_count>=2 &&
+    args->arg_count>=3 &&
 	args->arg_type[0]==STRING_RESULT &&
-	args->arg_type[1]==STRING_RESULT
+	args->arg_type[1]==STRING_RESULT &&
+	args->arg_type[2]==STRING_RESULT
     )
     {
 
@@ -342,7 +343,7 @@ my_bool redis_command_v2_init(
     	// everthing looks OK.
     	return 0;
     } else {
-    	snprintf(message,MYSQL_ERRMSG_SIZE,	"redis_command(cmd,arg1,arg2,..) Expected at least 2 string parameteres" );
+    	snprintf(message,MYSQL_ERRMSG_SIZE,	"redis_command(cmd,arg1,arg2,..) Expected exactly 3+ string parameteres" );
     	return 1;
     }
 
@@ -374,12 +375,12 @@ my_ulonglong redis_command_v2(
 		command->argvlen[i] = args->lengths[i];
 	}
 
-    if(queue) {
+    if(FALSE && queue) {
     	apr_status_t status = apr_queue_trypush(queue, (void*)command);
     	check_error(status);
     }
 
-    if (!queue || status != APR_SUCCESS  ) {   //send event directly.
+    if (TRUE || !queue || status != APR_SUCCESS  ) {   //send event directly.
 
     	long long res = _do_redis_command((const char **)command->argv,(const size_t *)command->argvlen, command->arg_count);
     	free_command(command);
@@ -420,4 +421,3 @@ my_ulonglong free_resources(
 	deinitialize_apr();
 	return 0;
 }
-
