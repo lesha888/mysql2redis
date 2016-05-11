@@ -12,7 +12,7 @@ static struct config cfg = {
     .unix_sock = {
     	.path = "/tmp/redis.sock"
      },
-    .password = "_PASSWORD_JXi6G3AL",
+    .password = "__PASSWORD__",
     .auth = 1,
     .log_file = "/tmp/redis_udf.log",
     .debug = 0,
